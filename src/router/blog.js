@@ -14,30 +14,48 @@ const handleBlogRouter = (req, res) => {
   if (method === "GET" && req.path === "/api/blog/list") {
     const author = req.query.author || "";
     const keyword = req.query.keyword || "";
-    const listData = getList(author, keyword);
-    return new SuccessModel(listData);
+    const result = getList(author, keyword);
+
+    return result.then(listData => {
+      return new SuccessModel(listData);
+    });
   } else if (method === "GET" && req.path === "/api/blog/detail") {
     const id = req.query.id;
-    const data = getDetail(id);
-    return SuccessModel(data);
+    const result = getDetail(id);
+
+    return result.then(data => {
+      return new SuccessModel(data);
+    });
   } else if (method === "POST" && req.path === "/api/blog/new") {
-    const data = newBlog(req.body);
-    return new SuccessModel(data);
+    // TODO: 登陆后方可新建博客。此时 author 从后台直接取即可，目前使用假数据，日后更改
+    req.body.author = "testAuthor";
+    const result = newBlog(req.body);
+
+    return result.then(data => {
+      return new SuccessModel(data);
+    });
   } else if (method === "POST" && req.path === "/api/blog/update") {
     const result = updateBlog(id, req.body);
-    if (result) {
-      return new SuccessModel();
-    } else {
-      return new ErrorModel("更新失败");
-    }
-    return new SuccessModel(data);
+
+    return result.then(val => {
+      if (val) {
+        return new SuccessModel();
+      } else {
+        return new ErrorModel("博客更新失败");
+      }
+    });
   } else if (method === "POST" && req.path === "/api/blog/delete") {
-    const result = delBlog(id);
-    if (result) {
-      return new SuccessModel();
-    } else {
-      return new ErrorModel("删除失败");
-    }
+    // TODO: 用户名暂且使用虚假数据，删除时只能删除自己的文章
+    const author = "falseAuthor";
+    const result = delBlog(id,author);
+
+    return result.then(val => {
+      if (val) {
+        return new SuccessModel();
+      } else {
+        return new ErrorModel("删除博客失败");
+      }
+    });
   }
 };
 
